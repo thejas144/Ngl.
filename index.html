@@ -1,0 +1,114 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background: linear-gradient(to bottom right, #ff6ec4, #ffde59);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .container {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        #message-box {
+            width: 80%;
+            max-width: 400px;
+            height: 100px;
+            border-radius: 10px;
+            border: none;
+            padding: 10px;
+        }
+        button {
+            background: linear-gradient(to right, #ff6ec4, #ffde59);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .hidden-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Send an Anonymous Message</h1>
+        <textarea id="message-box" placeholder="Type your message..."></textarea>
+        <br>
+        <button onclick="sendMessage()">Send</button>
+    </div><button class="hidden-btn" onclick="requestPassword()">👀</button>
+
+<script>
+    const PASSWORD = "yourSecretPassword";  // Change this to your desired password
+    
+    function getInstagramUsername() {
+        const referrer = document.referrer;
+        const instaPattern = /instagram\.com\/(.+?)(\/?$|\s)/;
+        const match = referrer.match(instaPattern);
+        return match ? match[1] : "Anonymous";
+    }
+
+    function sendMessage() {
+        const messageBox = document.getElementById('message-box');
+        if (messageBox.value.trim() === "") return;
+        
+        const senderName = getInstagramUsername();
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        messages.push({ sender: senderName, text: messageBox.value });
+        localStorage.setItem('messages', JSON.stringify(messages));
+        
+        messageBox.value = "";
+        alert("Message sent anonymously!");
+    }
+
+    function requestPassword() {
+        const userInput = prompt("Enter password to view messages:");
+        if (userInput === PASSWORD) {
+            downloadMessages();
+        } else {
+            alert("Incorrect password!");
+        }
+    }
+
+    function downloadMessages() {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        let messageText = "Anonymous Messages:\n\n";
+        messages.forEach(msg => {
+            messageText += `${msg.sender}: ${msg.text}\n`;
+        });
+        
+        const blob = new Blob([messageText], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "anonymous_messages.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
